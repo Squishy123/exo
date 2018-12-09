@@ -10,7 +10,7 @@ class DOMStage {
         this.children = [];    
 
         //start updating
-        this.updateDate = Date.now();
+        this.updateDate = window.performance.now();
     
         /**
          *@todo add automatic binding
@@ -41,12 +41,12 @@ class DOMStage {
 
     //run every tick
     fixedUpdate() {
-        if(this.properties.running && Date.now() - this.updateDate > 1000/this.properties.updateTicksPerSecond) {
+        if(this.properties.running && window.performance.now() - this.updateDate > 1000/this.properties.updateTicksPerSecond) {
             //run update
             this.update();
             
             //reset updateTimer
-            this.updateDate = Date.now();
+            this.updateDate = window.performance.now();
         }
         requestAnimationFrame(this.fixedUpdate);
     }
@@ -54,7 +54,7 @@ class DOMStage {
     //add a child element to the stage
     addChild(child) {
         this.children.push(child);
-        this.element.appendChild(child);
+        this.element.appendChild(child.element);
     }
 
     //removes an item from the world
