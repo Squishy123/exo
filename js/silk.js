@@ -1,17 +1,24 @@
-class DOMStage {
+class DOMActor {
     constructor(element, properties) {
         //Attach a DOM object to stage
         this.element = (element) ? element : document.createElement('div');
 
         //default properties if null
-        this.properties = (properties) ? properties : {width: 0, height: 0, running: false, updateTicksPerSecond: 0};
+        this.properties = (properties) ? properties : {
+            width: (this.properties.width) ? this.properties.width : 0, 
+            height: (this.properties.height) ? this.properties.height : 0, 
+            running: (this.properties.running) ? this.properties.running : false, 
+            updateTicksPerSecond: (this.properties.updateTicksPerSecond) ? this.properties.updateTicksPerSecond : 0, 
+            renderTicksPerSecond: (this.properties.renderTicksPerSecond) ? this.properties.renderTicksPerSecond: 0
+        };
 
         //child objects in stage
-        this.children = [];    
+        this.children = [];
 
         //start updating
         this.updateDate = window.performance.now();
-    
+        this.renderDate = window.performance.now();
+
         /**
          *@todo add automatic binding
          **/
@@ -28,26 +35,53 @@ class DOMStage {
     start() {
         this.properties.running = true;
         this.fixedUpdate();
-    }   
+    }
 
     //stop running
     stop() {
         this.properties.running = false;
     }
-    
-    //update called every updatetick
-    update() {
+
+    //called once on update tick
+    async init() {
+
+    }
+
+    //called every render tick
+    async render() {
+
+    }
+
+    //called every update tick
+    async update() {
+
+    }
+
+    //called when object is destroyed
+    async destroy() {
+
     }
 
     //run every tick
     fixedUpdate() {
-        if(this.properties.running && window.performance.now() - this.updateDate > 1000/this.properties.updateTicksPerSecond) {
+        if (this.properties.updateTicksPerSecond != 0 && this.properties.running && window.performance.now() - this.updateDate > 1000 / this.properties.updateTicksPerSecond) {
             //run update
             this.update();
-            
+
             //reset updateTimer
             this.updateDate = window.performance.now();
         }
+
+        if (this.properties.renderTicksPerSecond != 0 && this.properties.running && window.performance.now() - this.renderDate > 1000 / this.properties.renderTicksPerSecond) {
+            //run update
+            this.render();
+
+            //reset updateTimer
+            this.renderDate = window.performance.now();
+        }
+
+
+
         requestAnimationFrame(this.fixedUpdate);
     }
 
@@ -65,34 +99,28 @@ class DOMStage {
     }
 }
 
-class DOMActor {
-    constructor(element, properties) {
-        this.element = (element) ? element : document.createElement('div');
-        //bounds(width, height, x, y)
+class CanvasActor {
+    constructor(properties) {
         this.properties = (properties) ? properties : null;
-    }   
+    }
+
+    //called once on update tick
+    async init() {
+
+    }
 
     //called every render tick
-    render() {
+    async render() {
 
     }
 
     //called every update tick
-    update() {
-
-    }
-}
-
-class CanvasActor {
-    constructor(properties) {
-        this.properties = (properties) ? properties: null;
-    }
-
-    render() {
+    async update() {
 
     }
 
-    update() {
+    //called when object is destroyed
+    async destroy() {
 
     }
 }
