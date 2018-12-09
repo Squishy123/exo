@@ -4,11 +4,11 @@ class MainStage extends DOMActor{
     }
 
     update() {
-        console.log("Hello World!");
+        console.log(Date.now());
     }
 
     render() {
-        console.log("not rendering")
+        console.log(Date.now());
     }
 }
 
@@ -20,7 +20,7 @@ class GUIElement extends DOMActor {
 
 }
 
-let stage = new MainStage(document.querySelector('#stage'), {width: 'inherit', height: 'inherit', updateTicksPerSecond: 1, renderTicksPerSecond: 2});
+let stage = new MainStage(document.querySelector('#stage'), {width: 'inherit', height: 'inherit', updateTicksPerSecond: 1, renderTicksPerSecond: 1});
 
 let box = new DOMActor(document.createElement('div'), {width: 500, height: 500, x: 0, y: 0});
 
