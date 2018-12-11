@@ -5,11 +5,12 @@ class DOMActor {
 
         //default properties if null
         this.properties = (properties) ? properties : {
-            width: (this.properties.width) ? this.properties.width : 0,
-            height: (this.properties.height) ? this.properties.height : 0,
-            running: (this.properties.running) ? this.properties.running : false,
-            updateTicksPerSecond: (this.properties.updateTicksPerSecond) ? this.properties.updateTicksPerSecond : 0,
-            renderTicksPerSecond: (this.properties.renderTicksPerSecond) ? this.properties.renderTicksPerSecond : 0
+            width: (properties.width) ? properties.width : 0,
+            height: (properties.height) ? properties.height : 0,
+            running: (properties.running) ? properties.running : false,
+            updateTicksPerSecond: (properties.updateTicksPerSecond) ? properties.updateTicksPerSecond : 0,
+            renderTicksPerSecond: (properties.renderTicksPerSecond) ? properties.renderTicksPerSecond : 0,
+            hasInit: (properties.hasInit) ? properties.hasInit : false
         };
 
         //child objects in stage
@@ -60,7 +61,7 @@ class DOMActor {
 
     //Add or set style properties to the element
     //styles object
-    addStyles(styles) {
+    setStyles(styles) {
         Object.assign(this.element.style, styles);
     }
 
@@ -118,6 +119,12 @@ class DOMActor {
 
     //run every tick
     async fixedUpdate() {
+        //check for first init
+        if(!this.properties.hasInit){
+            this.properties.hasInit = !this.properties.hasInit;
+            this.init();
+        }
+
         let updateTask = new Promise(((resolve, reject) => {
             if (this.properties.updateTicksPerSecond != 0 && this.properties.running && window.performance.now() - this.updateDate > 1000 / this.properties.updateTicksPerSecond) {
                 //run update
