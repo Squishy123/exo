@@ -4,11 +4,11 @@ class MainStage extends DOMActor{
     }
 
     update() {
-        console.log(Date.now());
+        //console.log(Date.now());
     }
 
     render() {
-        console.log(Date.now());
+        //console.log(Date.now());
     }
 }
 

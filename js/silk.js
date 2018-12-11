@@ -45,6 +45,45 @@ class DOMActor {
         this.properties.running = false;
     }
 
+    //add a child element to the stage
+    addChild(child) {
+        this.children.push(child);
+        this.element.appendChild(child.element);
+    }
+
+    //removes an item from the world
+    removeChild(child) {
+        this.children = this.children.filter((v) => {
+            return !Object.is(v, child);
+        });
+    }
+
+    //Add or set style properties to the element
+    //styles object
+    addStyles(styles) {
+        Object.assign(this.element.style, styles);
+    }
+
+    //Remove styles from the element
+    //array of style names
+    removeStyles(...styles) {
+        styles.forEach((attr) => {
+            this.element.removeAttribute(attr);
+        })
+    }
+
+    //Add classes to the element
+    //string or array of classnames
+    addClasses(...classes) {
+        this.element.classList.add(classes);
+    }
+
+    //Remove classes from the element
+    //string or array of classnames
+    removeClasses(...classes) {
+        this.element.classList.remove(classes);
+    }
+
     //called once on update tick
     async init() { }
 
@@ -63,14 +102,18 @@ class DOMActor {
         this.destroy();
 
         //delete DOM elements and recursive objects
-
         this.children.map(async (c) => {
-            c.destroy();
+            c.fixedDestroy();
         });
 
-        //default gc element
-       // let properties
+        //remove element
+        this.element.remove();
 
+        //default gc element
+        let properties = Object.getOwnPropertyNames(this);
+        properties.forEach((prop) => {
+            this.prop = null;
+        });
     }
 
     //run every tick
@@ -99,19 +142,6 @@ class DOMActor {
 
         await Promise.all([updateTask, renderTask]);
         requestAnimationFrame(this.fixedUpdate);
-    }
-
-    //add a child element to the stage
-    addChild(child) {
-        this.children.push(child);
-        this.element.appendChild(child.element);
-    }
-
-    //removes an item from the world
-    removeChild(child) {
-        this.children = this.children.filter((v) => {
-            return !Object.is(v, child);
-        });
     }
 }
 
