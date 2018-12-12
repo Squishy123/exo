@@ -16,9 +16,9 @@ stage.setStyles({ display: "flex", "flex-direction": 'row', "flex-wrap": 'wrap' 
 
 let tiles = [];
 
-for (let x = 0; x < 4; x++) {
-    for (let y = 0; y < 4; y++) {
-        let box = new ColorSquare(null, { width: '25%', height: '25%', updateTicksPerSecond: 1, renderTicksPerSecond: 5 });
+for (let x = 0; x < 10; x++) {
+    for (let y = 0; y < 10; y++) {
+        let box = new ColorSquare(null, { width: '10%', height: '10%', updateTicksPerSecond: 1, renderTicksPerSecond: 5 });
         box.setStyles({ 'opacity': 0.2});
         tiles.push(box);
         stage.addChild(box);
