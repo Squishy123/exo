@@ -14,10 +14,13 @@ class DOMActor {
         };
 
         //set width and height
-        this.setStyles({ width: this.properties.width , height: this.properties.height});
+        this.setStyles({ width: this.properties.width, height: this.properties.height });
 
         //child objects in stage
         this.children = [];
+
+        //parent node
+        this.parent = null;
 
         //start updating
         this.updateDate = window.performance.now();
@@ -51,6 +54,7 @@ class DOMActor {
 
     //add a child element to the stage
     addChild(child) {
+        child.parent = this;
         this.children.push(child);
         this.element.appendChild(child.element);
     }
@@ -125,8 +129,14 @@ class DOMActor {
         //check for first init
         if (!this.properties.hasInit) {
             this.properties.hasInit = !this.properties.hasInit;
+            this.properties.running = true;
             this.init();
         }
+
+        //call fixedupdate on children
+        this.children.map(async (c) => {
+            c.fixedUpdate();
+        });
 
         let updateTask = new Promise(((resolve, reject) => {
             if (this.properties.updateTicksPerSecond != 0 && this.properties.running && window.performance.now() - this.updateDate > 1000 / this.properties.updateTicksPerSecond) {
@@ -151,7 +161,9 @@ class DOMActor {
         }).bind(this));
 
         await Promise.all([updateTask, renderTask]);
-        requestAnimationFrame(this.fixedUpdate);
+
+        if (this.parent == null)
+            requestAnimationFrame(this.fixedUpdate);
     }
 }
 
