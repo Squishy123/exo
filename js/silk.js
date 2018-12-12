@@ -5,13 +5,16 @@ class DOMActor {
 
         //default properties if null
         this.properties = (properties) ? properties : {
-            width: (properties.width) ? properties.width : 0,
-            height: (properties.height) ? properties.height : 0,
+            width: (properties.width) ? properties.width : null,
+            height: (properties.height) ? properties.height : null,
             running: (properties.running) ? properties.running : false,
             updateTicksPerSecond: (properties.updateTicksPerSecond) ? properties.updateTicksPerSecond : 0,
             renderTicksPerSecond: (properties.renderTicksPerSecond) ? properties.renderTicksPerSecond : 0,
             hasInit: (properties.hasInit) ? properties.hasInit : false
         };
+
+        //set width and height
+        this.setStyles({ width: this.properties.width , height: this.properties.height});
 
         //child objects in stage
         this.children = [];
@@ -120,7 +123,7 @@ class DOMActor {
     //run every tick
     async fixedUpdate() {
         //check for first init
-        if(!this.properties.hasInit){
+        if (!this.properties.hasInit) {
             this.properties.hasInit = !this.properties.hasInit;
             this.init();
         }

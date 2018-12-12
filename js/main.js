@@ -1,14 +1,7 @@
-class MainStage extends DOMActor {
+class ColorSquare extends DOMActor {
     constructor(element, properties) {
         super(element, properties);
-        this.setStyles({ "width": "500px", height: "500px", "background-color": "cornflowerblue" })
-    }
-
-    init() {
-
-    }
-
-    update() {
+        this.setStyles({ "background-color": "cornflowerblue" })
     }
 
     render() {
@@ -17,17 +10,13 @@ class MainStage extends DOMActor {
     }
 }
 
-class GUIElement extends DOMActor {
-    constructor(element, properties) {
-        super(element, properties);
-    }
 
+let stage = new ColorSquare(document.querySelector('#stage'), { width: '100%', height: '100%', updateTicksPerSecond: 1, renderTicksPerSecond: 1 });
 
-}
+let box = new ColorSquare(null, { width: '50%', height: '50%', updateTicksPerSecond: 1, renderTicksPerSecond: 1 });
+box.setStyles({ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' });
 
-let stage = new MainStage(document.querySelector('#stage'), { width: 'inherit', height: 'inherit', updateTicksPerSecond: 1, renderTicksPerSecond: 1 });
-
-let box = new DOMActor(document.createElement('div'), { width: 500, height: 500, x: 0, y: 0 });
 
 stage.addChild(box);
 stage.start();
+box.start();
