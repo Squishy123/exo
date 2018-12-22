@@ -168,27 +168,156 @@ class DOMActor {
 }
 
 class CanvasActor {
-    constructor(properties) {
-        this.properties = (properties) ? properties : null;
+    constructor(canvas, properties) {
+        //Attach canvas and context to actor
+        this.canvas = canvas;
+        this.ctx = canvas.getContext('2d');
+
+        //default properties if null
+        this.properties = (properties) ? properties : {
+            width: (properties.width) ? properties.width : null,
+            height: (properties.height) ? properties.height : null,
+            running: (properties.running) ? properties.running : false,
+            updateTicksPerSecond: (properties.updateTicksPerSecond) ? properties.updateTicksPerSecond : 0,
+            renderTicksPerSecond: (properties.renderTicksPerSecond) ? properties.renderTicksPerSecond : 0,
+            hasInit: (properties.hasInit) ? properties.hasInit : false
+        };
+
+        //child objects in stage
+        this.children = [];
+
+        //parent node
+        this.parent = null;
+
+        //start updating
+        this.updateDate = window.performance.now();
+        this.renderDate = window.performance.now();
+
+        /**
+         *@todo add automatic binding
+         **/
+        //bind super
+        this.start = this.start.bind(this);
+        this.stop = this.stop.bind(this);
+        this.draw = this.draw.bind(this);
+        this.init = this.init.bind(this);
+        this.render = this.render.bind(this);
+        this.update = this.update.bind(this);
+        this.destroy = this.destroy.bind(this);
+        this.fixedUpdate = this.fixedUpdate.bind(this);
+        this.addChild = this.addChild.bind(this);
+        this.removeChild = this.removeChild.bind(this);
     }
+
+
+    //start running
+    start() {
+        this.properties.running = true;
+        this.fixedUpdate();
+    }
+
+    //stop running
+    stop() {
+        this.properties.running = false;
+    }
+
+    //add a child element to the stage
+    addChild(child) {
+        child.parent = this;
+        this.children.push(child);
+    }
+
+    //removes an item from the world
+    removeChild(child) {
+        this.children = this.children.filter((v) => {
+            return !Object.is(v, child);
+        });
+    }
+
+    //individual draw function for each actor
+    async draw() { } 
 
     //called once on update tick
-    async init() {
-
-    }
+    async init() { }
 
     //called every render tick
-    async render() {
-
-    }
+    async render() { }
 
     //called every update tick
-    async update() {
-
-    }
+    async update() { }
 
     //called when object is destroyed
-    async destroy() {
+    async destroy() { }
 
+    //completely wipe out all memory references
+    async fixedDestroy() {
+        //run custom destroy
+        this.destroy();
+
+        //delete DOM elements and recursive objects
+        this.children.map(async (c) => {
+            c.fixedDestroy();
+        });
+
+        //remove element
+        this.element.remove();
+
+        //default gc element
+        let properties = Object.getOwnPropertyNames(this);
+        properties.forEach((prop) => {
+            this.prop = null;
+        });
+    }
+
+    //run every tick
+    async fixedUpdate() {
+        //check for first init
+        if (!this.properties.hasInit) {
+            this.properties.hasInit = !this.properties.hasInit;
+            this.properties.running = true;
+            this.init();
+        }
+
+        //call fixedupdate on children
+        this.children.map(async (c) => {
+            c.fixedUpdate();
+        });
+
+        let updateTask = new Promise(((resolve, reject) => {
+            if (this.properties.updateTicksPerSecond != 0 && this.properties.running && window.performance.now() - this.updateDate > 1000 / this.properties.updateTicksPerSecond) {
+                //run update
+                this.update();
+
+                //reset updateTimer
+                this.updateDate = window.performance.now();
+            }
+            resolve();
+        }).bind(this));
+
+        let renderTask = new Promise(((resolve, reject) => {
+            if (this.properties.renderTicksPerSecond != 0 && this.properties.running && window.performance.now() - this.renderDate > 1000 / this.properties.renderTicksPerSecond) {
+                //run update
+                this.render();
+
+                //reset updateTimer
+                this.renderDate = window.performance.now();
+            }
+            resolve();
+        }).bind(this));
+
+        await Promise.all([updateTask, renderTask]);
+
+        if (this.parent == null)
+            requestAnimationFrame(this.fixedUpdate);
+    }
+}
+
+class BoundingCanvasActor extends CanvasActor{
+    constructor(canvas, properties) {
+        super(canvas, properties);
+
+        //location
+        this.properties.x = (properties.x) ? properties.x : 0;
+        this.properties.y = (properties.y) ? properties.y : 0;
     }
 }

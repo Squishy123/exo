@@ -1,30 +1,83 @@
-class ColorSquare extends DOMActor {
-    constructor(element, properties) {
-        super(element, properties);
-        this.setStyles({ "background-color": "cornflowerblue", "transition": "background-color 0.3s ease" })
+class TileStage extends CanvasActor {
+    constructor(canvas, properties) {
+        super(canvas, properties);
+    }
+
+    draw() {
+        let rgb = [Math.floor(Math.random() * 256), Math.floor(Math.random() * 256), Math.floor(Math.random() * 256)];
+        this.ctx.fillStyle = `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
+        this.ctx.fillRect(0, 0, this.canvas.scrollWidth, this.canvas.scrollHeight);
+    }
+
+    update() {
+
     }
 
     render() {
-        let rgb = [Math.floor(Math.random() * 256), Math.floor(Math.random() * 256), Math.floor(Math.random() * 256)];
-        this.setStyles({ 'background-color': `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})` });
+        //this.draw();
     }
 }
 
+class Tile extends BoundingCanvasActor {
+    constructor(canvas, properties) {
+        super(canvas, properties);
+        this.properties.sprite = properties.sprite;
+    }
 
-let stage = new ColorSquare(document.querySelector('#stage'), { width: '100%', height: '100%', updateTicksPerSecond: 1, renderTicksPerSecond: 1 });
-stage.setStyles({ display: "flex", "flex-direction": 'row', "flex-wrap": 'wrap' });
+    init() {
+        this.draw();
+    }
 
-let tiles = [];
-
-for (let x = 0; x < 10; x++) {
-    for (let y = 0; y < 10; y++) {
-        let box = new ColorSquare(null, { width: '10%', height: '10%', updateTicksPerSecond: 1, renderTicksPerSecond: 5 });
-        box.setStyles({ 'opacity': 0.2});
-        tiles.push(box);
-        stage.addChild(box);
+    draw() {
+        this.ctx.drawImage(this.properties.sprite, this.properties.x, this.properties.y);
     }
 }
 
+//array of assets with format {name: "", path: ""}
+async function loadAssets(assets) {
 
-stage.start();
-//box.start();
+    let loader = assets.map((path) => {
+        let p = new Promise((resolve, reject) => {
+            let img = new Image();
+            img.src = path;
+            img.onload = () => {
+                resolve(img);
+            }
+        });
+        return p;
+    });
+
+    let loaded = await Promise.all(loader);
+    return loaded
+}
+
+
+async function main() {
+    let canvasElement = document.querySelector('#stage');
+    [canvasElement.width, canvasElement.height] = [800, 500];
+
+    //load assets
+    let assets = await loadAssets(['res/grass-0.png', 'res/grass-1.png', 'res/grass-edge.png'])
+    console.log(assets);
+
+    //set canvas width and height
+    let canvas = new DOMActor(document.querySelector('#stage'), { width: '800px', height: '500px' });
+
+    //setup world
+    let world = new TileStage(document.querySelector('#stage'), { updateTicksPerSecond: 60, renderTicksPerSecond: 1 });
+    world.start();
+
+    for (let i = 0; i<15; i++) {
+        let tile = new Tile(document.querySelector('#stage'), { x: i*33, y: 300, width: 50, height: 50 , sprite: assets[0]});
+        world.addChild(tile);
+    }
+
+    for (let i = 0; i<13; i++) {
+        let tile = new Tile(document.querySelector('#stage'), { x: 800-(i*33), y: 100, width: 50, height: 50 , sprite: assets[0]});
+        world.addChild(tile);
+    }
+
+}
+
+
+main();
