@@ -235,7 +235,7 @@ class CanvasActor {
     }
 
     //individual draw function for each actor
-    async draw() { } 
+    async draw() { }
 
     //called once on update tick
     async init() { }
@@ -265,7 +265,7 @@ class CanvasActor {
         //default gc element
         let properties = Object.getOwnPropertyNames(this);
         properties.forEach((prop) => {
-            this.prop = null;
+            delete this[prop];
         });
     }
 
@@ -312,12 +312,135 @@ class CanvasActor {
     }
 }
 
-class BoundingCanvasActor extends CanvasActor{
+class BoundingCanvasActor extends CanvasActor {
     constructor(canvas, properties) {
         super(canvas, properties);
 
         //location
         this.properties.x = (properties.x) ? properties.x : 0;
         this.properties.y = (properties.y) ? properties.y : 0;
+    }
+}
+
+class QuadTree {
+    //Create a new quadtree given a current level and bounds object({x, y, width, height})
+    constructor(currentLevel, bounds) {
+        //properties
+        this.level = currentLevel;
+        this.objects = [];
+        this.bounds = bounds;
+        this.nodes = [];
+
+        //default consts
+        const MAX_OBJECTS = 10;
+        const MAX_LEVELS = 5;
+    }
+
+    //clears the quadtree
+    clear() {
+        //empty objects
+        objects = [];
+
+        //recursively clear all nodes
+        for (let i = 0; i < nodes.length; i++) {
+            nodes[i].clear();
+        }
+
+        //empty nodes
+        nodes = [];
+    }
+
+    //split this node into 4 subnodes
+    split() {
+        subWidth = this.bounds.width / 2;
+        subHeight = this.bounds.height / 2;
+
+        //node 0
+        this.nodes.push(new QuadTree(this.level + 1, { x: this.bounds.x + subWidth, y: this.bounds.y, width: subWidth, height: subHeight }));
+
+        //node 1
+        this.nodes.push(new QuadTree(this.level + 1, { x: this.bounds.x, y: this.bounds.y, width: subWidth, height: subHeight }));
+
+        //node 2
+        this.nodes.push(new QuadTree(this.level + 1, { x: this.bounds.x, y: this.bounds.y + subHeight, width: subWidth, height: subHeight }));
+
+        //node 3
+        this.nodes.push(new QuadTree(this.level + 1, { x: this.bounds.x + subWidth, y: this.bounds.y + subHeight, width: subWidth, height: subHeight }));
+    }
+
+    //find which node a given object belongs to
+    getIndex(nodeBounds) {
+        let index = -1;
+        let verticalMidpoint = this.bounds.x + (this.bounds.width / 2);
+        let horizontalMidpoint = this.bounds.y + (this.bounds.height / 2);
+
+        //Object fits within the top quadrants
+        let topQuad = (nodeBounds.y < horizontalMidpoint && nodeBounds.y + nodeBounds.height < horizontalMidpoint);
+        //Object fits within the bottom quadrants
+        let botQuad = (nodeBounds.y > horizontalMidpoint);
+
+        //Object fits within the left quadrants
+        if (nodeBounds.x < verticalMidpoint && nodeBounds.x + nodeBounds.width < verticalMidpoint) {
+            if (topQuad)
+                index = 1;
+            else if (botQuad)
+                index = 2;
+        }
+        //Object fits within the right quadrants
+        else if (nodeBounds.x > verticalMidpoint) {
+            if (topQuad)
+                index = 0;
+            else if (botQuad)
+                index = 3;
+        }
+
+        return index;
+    }
+
+    //insert an object into the quadtree, if the node exceeds the capacity
+    // split and add objects to their corresponding nodes
+    insert(actor) {
+        if (this.nodes[0] != null) {
+            let index = getIndex(actor.properties.bounds);
+
+            if (index != -1) {
+                nodes[index].insert(actor);
+
+                return;
+            }
+        }
+
+        this.actorects.push(actor);
+
+        //overflow
+        if (this.objects.length > this.MAX_OBJECTS && this.level < this.MAX_LEVELS) {
+            if (!nodes[0]) {
+                this.split();
+            }
+            //add to the corresponding nodes
+            for (let i = 0; i < this.objects.length; i++) {
+                let index = getIndex(this.objects[i]);
+                if (index != -1) {
+                    nodes[index].insert(this.objects[i]);
+                    this.objects = this.objects.splice(i, i + 1);
+                }
+            }
+        }
+    }
+
+    //return all objects that could collide with a given object
+    retrieve(actor, retrievedObjs) {
+        //check if retrievedObjs is null
+        if(!retrievedObjs)
+            retrievedObjs = [];
+            
+        let index = getIndex(actor.properties.bounds);
+        if(index != -1 && this.nodes[0] != null) {
+            nodes[index].retrieve(actor, retrievedObjs);
+        }
+
+        retrievedObjs.push(...this.objects);
+
+        return retrievedObjs;
     }
 }

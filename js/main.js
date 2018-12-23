@@ -35,7 +35,6 @@ class Tile extends BoundingCanvasActor {
 
 //array of assets with format {name: "", path: ""}
 async function loadAssets(assets) {
-
     let loader = assets.map((path) => {
         let p = new Promise((resolve, reject) => {
             let img = new Image();
@@ -57,23 +56,23 @@ async function main() {
     [canvasElement.width, canvasElement.height] = [800, 500];
 
     //load assets
-    let assets = await loadAssets(['res/grass-0.png', 'res/grass-1.png', 'res/grass-edge.png'])
-    console.log(assets);
+    const GRASS_TILES = await loadAssets(['res/grass-0.png', 'res/grass-1.png', 'res/grass-edge.png'])
 
     //set canvas width and height
-    let canvas = new DOMActor(document.querySelector('#stage'), { width: '800px', height: '500px' });
+    let canvas = new DOMActor(document.querySelector('#stage'), { width: '800px', height: '500px'});
+    canvas.setStyles({"background-color": "cornflowerblue"});
 
     //setup world
     let world = new TileStage(document.querySelector('#stage'), { updateTicksPerSecond: 60, renderTicksPerSecond: 1 });
     world.start();
 
     for (let i = 0; i<15; i++) {
-        let tile = new Tile(document.querySelector('#stage'), { x: i*33, y: 300, width: 50, height: 50 , sprite: assets[0]});
+        let tile = new Tile(document.querySelector('#stage'), { x: i*33, y: 300, width: 33, height: 33 , sprite: GRASS_TILES[0]});
         world.addChild(tile);
     }
 
     for (let i = 0; i<13; i++) {
-        let tile = new Tile(document.querySelector('#stage'), { x: 800-(i*33), y: 100, width: 50, height: 50 , sprite: assets[0]});
+        let tile = new Tile(document.querySelector('#stage'), { x: 800-(i*33), y: 100, width: 33, height: 33 , sprite: GRASS_TILES[0]});
         world.addChild(tile);
     }
 
