@@ -332,8 +332,8 @@ class QuadTree {
         this.nodes = [];
 
         //default consts
-        const MAX_OBJECTS = 10;
-        const MAX_LEVELS = 5;
+        this.MAX_OBJECTS = 10;
+        this.MAX_LEVELS = 5;
     }
 
     //clears the quadtree
@@ -352,8 +352,8 @@ class QuadTree {
 
     //split this node into 4 subnodes
     split() {
-        subWidth = this.bounds.width / 2;
-        subHeight = this.bounds.height / 2;
+        let subWidth = this.bounds.width / 2;
+        let subHeight = this.bounds.height / 2;
 
         //node 0
         this.nodes.push(new QuadTree(this.level + 1, { x: this.bounds.x + subWidth, y: this.bounds.y, width: subWidth, height: subHeight }));
@@ -401,7 +401,7 @@ class QuadTree {
     // split and add objects to their corresponding nodes
     insert(actor) {
         if (this.nodes[0] != null) {
-            let index = getIndex(actor.properties.bounds);
+            let index = this.getIndex(actor.properties);
 
             if (index != -1) {
                 nodes[index].insert(actor);
@@ -410,16 +410,16 @@ class QuadTree {
             }
         }
 
-        this.actorects.push(actor);
+        this.objects.push(actor);
 
         //overflow
         if (this.objects.length > this.MAX_OBJECTS && this.level < this.MAX_LEVELS) {
-            if (!nodes[0]) {
+            if (!this.nodes[0]) {
                 this.split();
             }
             //add to the corresponding nodes
             for (let i = 0; i < this.objects.length; i++) {
-                let index = getIndex(this.objects[i]);
+                let index = this.getIndex(this.objects[i].properties);
                 if (index != -1) {
                     nodes[index].insert(this.objects[i]);
                     this.objects = this.objects.splice(i, i + 1);
@@ -431,11 +431,11 @@ class QuadTree {
     //return all objects that could collide with a given object
     retrieve(actor, retrievedObjs) {
         //check if retrievedObjs is null
-        if(!retrievedObjs)
+        if (!retrievedObjs)
             retrievedObjs = [];
-            
-        let index = getIndex(actor.properties.bounds);
-        if(index != -1 && this.nodes[0] != null) {
+
+        let index = this.getIndex(actor.properties);
+        if (index != -1 && this.nodes[0] != null) {
             nodes[index].retrieve(actor, retrievedObjs);
         }
 
